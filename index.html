@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DNA Fingerprinting Challenge</title>
+
+<style>
+*{box-sizing:border-box}
+body{
+  margin:0;min-height:100vh;padding:18px 12px;
+  display:flex;justify-content:center;align-items:center;
+  font-family:Georgia,"Times New Roman",serif;color:#102052;
+  background:linear-gradient(135deg,#f7d7e5,#fff0f5,#efbfd5);
+}
+.poster{
+  width:100%;max-width:700px;padding:clamp(14px,4vw,28px);
+  background:#fffaf5;border:3px solid #d8b66b;border-radius:22px;
+  box-shadow:0 12px 35px #18245330;position:relative;overflow:hidden;
+}
+.university{
+  text-align:center;font:700 12px Arial,sans-serif;
+  letter-spacing:1.5px;color:#263775;margin:5px 0 12px;
+}
+h1{
+  text-align:center;text-transform:uppercase;color:#101e53;
+  font-size:clamp(25px,6vw,42px);line-height:1.04;margin:0;
+}
+.subtitle{text-align:center;font-size:19px;font-style:italic;margin:10px 0 22px}
+.quiz{
+  background:linear-gradient(145deg,#192b6a,#08143f);
+  border:3px solid #d7b66b;border-radius:24px;padding:16px;
+  box-shadow:inset 0 0 0 3px #ffffff12;
+}
+.quiz h2{
+  text-align:center;color:#fff;font-size:clamp(27px,6vw,38px);
+  font-style:italic;margin:3px 0 8px;
+}
+.hint{text-align:center;color:#f6cce0;font:14px Arial,sans-serif;line-height:1.5}
+.unknown{
+  background:#fff1f6;border:2px solid #dfc17a;
+  border-radius:14px;padding:0 8px 8px;margin:18px 0;
+}
+.label{
+  text-align:center;font:800 14px Arial,sans-serif;color:#17275c;
+  padding:10px 4px;
+}
+.gel{
+  height:90px;border-radius:8px;overflow:hidden;
+  background:linear-gradient(90deg,#071039,#132969,#071039);
+  display:flex;justify-content:space-around;align-items:stretch;
+  padding:8px 7px;gap:5px;
+  box-shadow:inset 0 0 15px #0008;
+}
+.lane{position:relative;flex:1;max-width:42px;height:100%}
+.band{
+  position:absolute;left:0;width:100%;height:5px;border-radius:2px;
+  box-shadow:0 0 7px currentColor,0 0 13px currentColor;
+}
+.blue{background:#19caff;color:#19caff}
+.pink{background:#ff55e9;color:#ff55e9}
+.purple{background:#a86aff;color:#a86aff}
+.white{background:#a8f7ff;color:#a8f7ff}
+.samples{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}
+.sample{
+  border:2px solid #d9bd7c;background:#fff4f8;color:#14245b;
+  border-radius:13px;padding:9px 6px;cursor:pointer;
+  transition:.18s;min-width:0;
+}
+.sample:hover{transform:translateY(-3px);box-shadow:0 5px 14px #0003}
+.sample:focus-visible{outline:3px solid #ff83c5;outline-offset:2px}
+.sample h3{font:800 clamp(11px,2.7vw,15px) Arial,sans-serif;margin:0 0 9px}
+.sample .gel{height:100px;padding:6px 4px;gap:4px}
+.sample .band{height:5px}
+.check{font:28px Arial,sans-serif;margin-top:7px}
+.instruction{text-align:center;color:#f9dbe9;font:13px Arial,sans-serif;margin:17px 0 3px}
+.footer{text-align:center;font:12px/1.6 Arial,sans-serif;margin-top:16px;color:#33437d}
+.result{
+  display:none;position:fixed;inset:0;z-index:10;
+  align-items:center;justify-content:center;text-align:center;
+  padding:24px;font-family:Arial,sans-serif;color:white;
+}
+.result.show{display:flex;animation:appear .2s ease}
+.wrong{background:#b51f38}
+.correct{background:#168044}
+.result-inner{max-width:480px}
+.symbol{font-size:100px;line-height:1;margin-bottom:18px}
+.result h2{font-size:clamp(40px,10vw,64px);margin:0 0 14px}
+.result p{font-size:18px;line-height:1.5}
+.result button{
+  border:0;border-radius:30px;background:white;color:#a11c32;
+  padding:14px 28px;font-size:17px;font-weight:bold;cursor:pointer;
+}
+.correct button{color:#146c3a}
+@keyframes appear{from{opacity:0}to{opacity:1}}
+@media(max-width:360px){
+  body{padding:6px}
+  .poster{padding:10px}
+  .quiz{padding:10px}
+  .samples{gap:5px}
+  .sample{padding:7px 3px}
+}
+</style>
+</head>
+
+<body>
+<main class="poster">
+  <div class="university">BIOTECHNOLOGY • GENETICS • DNA ANALYSIS</div>
+  <h1>Genetic Markers &<br>DNA Fingerprinting</h1>
+  <div class="subtitle">From DNA to Identity</div>
+
+  <section class="quiz">
+    <h2>Can you find<br>the match?</h2>
+    <p class="hint">Compare the DNA band patterns and choose the matching sample.</p>
+
+    <div class="unknown">
+      <div class="label">UNKNOWN PROFILE</div>
+      <div class="gel" id="unknown"></div>
+    </div>
+
+    <div class="samples">
+      <button class="sample" data-answer="A">
+        <h3>SAMPLE A</h3>
+        <div class="gel" id="sampleA"></div>
+        <div class="check">☑</div>
+      </button>
+      <button class="sample" data-answer="B">
+        <h3>SAMPLE B</h3>
+        <div class="gel" id="sampleB"></div>
+        <div class="check">☑</div>
+      </button>
+      <button class="sample" data-answer="C">
+        <h3>SAMPLE C</h3>
+        <div class="gel" id="sampleC"></div>
+        <div class="check">☑</div>
+      </button>
+    </div>
+
+    <p class="instruction">Tap a sample to check your answer.</p>
+  </section>
+
+  <div class="footer">
+    <strong>DNA MATCHING CHALLENGE</strong><br>
+    Study the bands carefully before you choose.
+  </div>
+</main>
+
+<div class="result wrong" id="wrong" role="dialog" aria-modal="true">
+  <div class="result-inner">
+    <div class="symbol">✕</div>
+    <h2>Try Again!</h2>
+    <p>That profile doesn't match. Compare the DNA bands carefully and try again.</p>
+    <button id="retry">Back to Question</button>
+  </div>
+</div>
+
+<div class="result correct" id="correct" role="dialog" aria-modal="true">
+  <div class="result-inner">
+    <div class="symbol">✓</div>
+    <h2>Correct Answer!</h2>
+    <p>Excellent work! You found the matching DNA profile.</p>
+    <button id="playAgain">Play Again</button>
+  </div>
+</div>
+
+<script>
+// Change B to A or C if you want a different correct answer.
+const CORRECT_ANSWER = "B";
+
+// Band positions are percentages from the top of each DNA lane.
+// The correct sample must have the same positions as the unknown.
+const profiles = {
+  unknown: [
+    [12,32,58,78],
+    [20,43,68,86],
+    [12,32,48,78],
+    [20,43,58,86],
+    [12,32,58,68,86],
+    [20,43,68,78],
+    [12,32,48,78]
+  ],
+  A: [
+    [12,32,58,78],
+    [20,43,68,86],
+    [12,48,68,78],
+    [20,43,58,86],
+    [12,32,58,68,86],
+    [20,48,68,78],
+    [12,32,48,78]
+  ],
+  B: [
+    [12,32,58,78],
+    [20,43,68,86],
+    [12,32,48,78],
+    [20,43,58,86],
+    [12,32,58,68,86],
+    [20,43,68,78],
+    [12,32,48,78]
+  ],
+  C: [
+    [18,38,62,84],
+    [12,48,72,88],
+    [18,38,62,72],
+    [12,48,62,88],
+    [18,38,62,72,88],
+    [12,48,72,84],
+    [18,38,52,84]
+  ]
+};
+
+const colors = ["blue","pink","purple","white"];
+
+function drawProfile(elementId, profile) {
+  const gel = document.getElementById(elementId);
+  gel.innerHTML = "";
+
+  profile.forEach((positions, index) => {
+    const lane = document.createElement("div");
+    lane.className = "lane";
+
+    positions.forEach((position, row) => {
+      const band = document.createElement("span");
+      band.className = "band " + colors[(index + row) % colors.length];
+      band.style.top = position + "%";
+      lane.appendChild(band);
+    });
+
+    gel.appendChild(lane);
+  });
+}
+
+drawProfile("unknown", profiles.unknown);
+drawProfile("sampleA", profiles.A);
+drawProfile("sampleB", profiles.B);
+drawProfile("sampleC", profiles.C);
+
+const wrongScreen = document.getElementById("wrong");
+const correctScreen = document.getElementById("correct");
+let previousButton = null;
+
+document.querySelectorAll(".sample").forEach(button => {
+  button.addEventListener("click", () => {
+    previousButton = button;
+
+    if (button.dataset.answer === CORRECT_ANSWER) {
+      correctScreen.classList.add("show");
+      document.getElementById("playAgain").focus();
+    } else {
+      wrongScreen.classList.add("show");
+      document.getElementById("retry").focus();
+    }
+  });
+});
+
+document.getElementById("retry").addEventListener("click", () => {
+  wrongScreen.classList.remove("show");
+  if (previousButton) previousButton.focus();
+});
+
+document.getElementById("playAgain").addEventListener("click", () => {
+  correctScreen.classList.remove("show");
+  if (previousButton) previousButton.focus();
+});
+</script>
+</body>
+  </html>
